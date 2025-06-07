@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="pt-BR"><head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - NR7</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <link rel="icon" href="favicon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head><body class="bg-gray-50 min-h-screen px-4 py-6">
+  <header class="flex items-center gap-3 mb-6">
+    <img src="assets/logo_app_psicossocial.png" alt="Logo" class="w-10 h-10" />
+    <h1 class="text-xl font-bold text-blue-700">Cadastro do Avaliado</h1>
+  </header>
+  <form id="form-cadastro" class="space-y-4 max-w-md mx-auto">
+    <input type="text" id="nome" placeholder="Nome" required class="w-full border px-3 py-2 rounded" />
+    <input type="email" id="email" placeholder="E-mail" required class="w-full border px-3 py-2 rounded" />
+    <select id="setor" required class="w-full border px-3 py-2 rounded">
+      <option value="">Setor</option><option value="RH">RH</option><option value="TI">TI</option>
+    </select>
+    <div class="flex items-start">
+      <input type="checkbox" id="aceito-politica" required class="mt-1 mr-2"><label for="aceito-politica" class="text-sm">Aceito a política de privacidade.</label>
+    </div>
+    <button type="submit" class="block w-full bg-blue-600 text-white py-2 rounded text-center hover:bg-blue-700">Continuar</button>
+  </form>
+
+<script>
+  const supabaseUrl = "https://ludidaembqkovhccerqc.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1ZGlkYWVtYnFrb3ZoY2NlcnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ5NTQ4NTYsImV4cCI6MjA2MDUzMDg1Nn0.IuWoh-f_UmYD8Zu3JDeowIjVJHJTuur9Df3OVU0ZXb4";
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  document.getElementById("form-cadastro").addEventListener("submit", async (event) => {
+    event.preventDefault(); // Impede o envio padrão do formulário
+
+    const nome = document.getElementById("nome").value;
+    const email = document.getElementById("email").value;
+    const setor = document.getElementById("setor").value;
+    const aceitoPolitica = document.getElementById("aceito-politica").checked;
+
+    if (!aceitoPolitica) {
+      alert("Você deve aceitar a política de privacidade para continuar.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('colaboradores')
+      .insert([
+        { nome: nome, email: email, setor: setor },
+      ])
+      .select(); // Para retornar o ID do registro inserido
+
+    if (error) {
+      console.error('Erro no cadastro:', error);
+      alert('Erro ao cadastrar. Tente novamente.');
+    } else if (data && data.length > 0) {
+      const colaboradorId = data[0].id;
+      window.location.href = `consentimento.html?colaborador_id=${colaboradorId}`;
+    } else {
+      // Fallback caso não retorne data, embora .select() deva garantir
+      alert('Cadastro realizado, mas houve um problema ao obter o ID. Redirecionando...');
+      window.location.href = "consentimento.html";
+    }
+  });
+</script>
+</body></html>
